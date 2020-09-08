@@ -1,0 +1,288 @@
+---
+title: "Comparison of nlp styles in thesis"
+author: "Lemon Reimer"
+date: "7/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+```{r read in data}
+pro_nodes = read.csv("./datasets/pro_nodelist_1289645478494130176_2020-08-09.csv")
+pro_edges = read.csv("./datasets/pro_edgelist_1289645478494130176_2020-08-03.csv")
+pro_nodes_all = read.csv("./datasets/full_pro_nodelist_1289645478494130176_2020-08-09.csv")
+pro_edges_all = read.csv("./datasets/full_pro_edgelist_1289645478494130176_2020-08-03.csv")
+
+anti_nodes = read.csv("./datasets/anti_nodelist_1267533752420491264_2020-08-09.csv")
+anti_edges = read.csv("./datasets/anti_edgelist_1267533752420491264_2020-07-28.csv")
+anti_nodes_all = read.csv("./datasets/full_anti_nodelist_1267533752420491264_2020-08-09.csv")
+anti_edges_all = read.csv("./datasets/full_anti_edgelist_1267533752420491264_2020-08-09.csv")
+```
+
+```{r compile all nodes into df for viz}
+nodes = rbind(data.frame(pro_nodes, "is_anti" = 0), data.frame(anti_nodes, "is_anti" = 1))
+nodes_all = rbind(data.frame(pro_nodes_all, "is_anti" = 0), data.frame(anti_nodes_all, "is_anti" = 1))
+```
+
+```{r swap position of uuid and names for pro}
+pro_nodes = pro_nodes[,c(2,1,3:ncol(pro_nodes))]
+pro_nodes_all = pro_nodes_all[,c(2,1,3:ncol(pro_nodes_all))]
+```
+
+```{r libs, include = F}
+library(igraph, warn.conflicts=FALSE, quietly=TRUE)
+library(dplyr, warn.conflicts=FALSE, quietly=TRUE)
+library(huxtable, warn.conflicts=FALSE, quietly=TRUE)
+library(ggplot2, warn.conflicts = FALSE, quietly = TRUE)
+library(gridExtra, warn.conflicts = FALSE, quietly = TRUE)
+library(wesanderson, warn.conflicts = FALSE, quietly = TRUE)
+```
+
+# Data Visualization of Nodes
+
+```{r attr distribution}
+plt1 <- ggplot(nodes_all, aes(x = followers_count, fill = as.factor(is_anti))) + geom_histogram(alpha = 0.5, position = "identity", bins = 50) + ggtitle("Distribution of total followers\nfor pro- and anti-vaccination nodes") + xlab("total followers") + scale_fill_manual(values = c("skyblue","pink"), breaks = c(0, 1), labels = c("provaxx", "antivaxx")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.background = element_blank(), legend.key = element_blank(), legend.position="top", legend.title = element_blank(), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), plot.margin = unit(c(1, 2, 1, 1), "lines"))
+
+plt2 <- ggplot(nodes_all, aes(x = friends_count, fill = as.factor(is_anti))) + geom_histogram(alpha = 0.5, position = "identity", bins = 50) + ggtitle("Distribution of total accounts followed\nfor pro- and anti-vaccination nodes") + xlab("total accounts followed") + scale_fill_manual(values = c("skyblue","pink"), breaks = c(0, 1), labels = c("provaxx", "antivaxx")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.background = element_blank(), legend.key = element_blank(), legend.position="top", legend.title = element_blank(), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), plot.margin = unit(c(1, 2, 1, 1), "lines"))
+
+plt3 <- ggplot(nodes_all, aes(x = statuses_count, fill = as.factor(is_anti))) + geom_histogram(alpha = 0.5, position = "identity", bins = 50) + ggtitle("Distribution of total statuses (tweets)\nfor pro- and anti-vaccination nodes") + xlab("total statuses (tweets) posted") + scale_fill_manual(values = c("skyblue","pink"), breaks = c(0, 1), labels = c("provaxx", "antivaxx")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.background = element_blank(), legend.key = element_blank(), legend.position="top", legend.title = element_blank(), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), plot.margin = unit(c(1, 2, 1, 1), "lines"))
+
+plt4 <- ggplot(nodes_all, aes(x = favourites_count, fill = as.factor(is_anti))) + geom_histogram(alpha = 0.5, position = "identity", bins = 50) + ggtitle("Distribution of total favorited tweets\nfor pro- and anti-vaccination nodes") + xlab("total tweets favorited") + scale_fill_manual(values = c("skyblue","pink"), breaks = c(0, 1), labels = c("provaxx", "antivaxx")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.background = element_blank(), legend.key = element_blank(), legend.position="top", legend.title = element_blank(), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), plot.margin = unit(c(1, 2, 1, 1), "lines"))
+
+#grid.arrange(plt1, plt2, plt3, plt4, nrow = 2)
+plt1
+plt2
+plt3
+plt4
+```
+
+```{r}
+plt5 <- ggplot(nodes_all, aes(x = pre_sent, fill = as.factor(is_anti))) + geom_histogram(alpha = 0.5, position = "identity", bins = 50) + ggtitle("Distribution of pre-exposure sentiment") + xlab("Sentiment score\n(negative = negative and positive = positive\ndistance from 0 describes intensity)")  + scale_fill_manual(values = c("skyblue","pink"), breaks = c(0, 1), labels = c("provaxx", "antivaxx")) +  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.background = element_blank(), legend.key = element_blank(), legend.position="top", legend.title = element_blank(), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), plot.margin = unit(c(1, 2, 1, 1), "lines"))
+
+plt6 <- ggplot(nodes_all, aes(x = post_sent, fill = as.factor(is_anti))) + geom_histogram(alpha = 0.5, position = "identity", bins = 50) + ggtitle("Distribution of post-exposure sentiment") + xlab("Sentiment score\n(negative = negative and positive = positive\ndistance from 0 describes intensity)")  + scale_fill_manual(values = c("skyblue","pink"), breaks = c(0, 1), labels = c("provaxx", "antivaxx")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.background = element_blank(), legend.key = element_blank(), legend.position="top", legend.title = element_blank(), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), plot.margin = unit(c(1, 2, 1, 1), "lines"))
+
+plt7<- ggplot(nodes_all, aes(x = diff_sent, fill = as.factor(is_anti))) + geom_histogram(alpha = 0.5, position = "identity", bins = 50) + ggtitle("Distribution of difference in sentiment\nfrom pre- to post-exposure") + xlab("Sentiment score\n(negative change means more anti-vaxx after exposure)")  + scale_fill_manual(values = c("skyblue","pink"), breaks = c(0, 1), labels = c("provaxx", "antivaxx")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.background = element_blank(), legend.key = element_blank(), legend.position="top", legend.title = element_blank(), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), plot.margin = unit(c(1, 2, 1, 1), "lines"))
+
+#grid.arrange(plt5, plt6, plt7, nrow = 3)
+plt5
+plt6
+plt7
+```
+
+```{r}
+plt8 <- ggplot(nodes_all, aes(x = pre_ML, fill = as.factor(is_anti))) + geom_histogram(alpha = 0.5, position = "identity", bins = 50) + ggtitle("Distribution of pre-exposure sentiment (logreg)") + xlab("Sentiment score\n(negative < 0.5 and positive >= 0.5\ndistance from 0.5 describes intensity)")  + scale_fill_manual(values = c("skyblue","pink"), breaks = c(0, 1), labels = c("provaxx", "antivaxx")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.background = element_blank(), legend.key = element_blank(), legend.position="top", legend.title = element_blank(), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), plot.margin = unit(c(1, 2, 1, 1), "lines"))
+
+plt9 <- ggplot(nodes_all, aes(x = post_ML, fill = as.factor(is_anti))) + geom_histogram(alpha = 0.5, position = "identity", bins = 50) + ggtitle("Distribution of post-exposure sentiment (logreg)") + xlab("Sentiment score\n(negative < 0.5 and positive >= 0.5\ndistance from 0.5 describes intensity)")  + scale_fill_manual(values = c("skyblue","pink"), breaks = c(0, 1), labels = c("provaxx", "antivaxx")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.background = element_blank(), legend.key = element_blank(), legend.position="top", legend.title = element_blank(), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), plot.margin = unit(c(1, 2, 1, 1), "lines"))
+
+plt10 <- ggplot(nodes_all, aes(x = diff_ML, fill = as.factor(is_anti))) + geom_histogram(alpha = 0.5, position = "identity", bins = 50) + ggtitle("Distribution of difference in sentiment\nfrom pre- to post-exposure (logreg)") + xlab("Sentiment score\n(negative change means more anti-vaxx after exposure)")  + scale_fill_manual(values = c("skyblue","pink"), breaks = c(0, 1), labels = c("provaxx", "antivaxx")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), legend.background = element_blank(), legend.key = element_blank(), legend.position="top", legend.title = element_blank(), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), plot.margin = unit(c(1, 2, 1, 1), "lines"))
+
+#grid.arrange(plt5, plt6, plt7, nrow = 3)
+plt8
+plt9
+plt10
+```
+
+# Statistics
+
+```{r hypothesis stats}
+t.test(nodes_all$favourites_count ~ nodes_all$is_anti)
+t.test(nodes_all$followers_count ~ nodes_all$is_anti)
+t.test(nodes_all$friends_count ~ nodes_all$is_anti)
+t.test(nodes_all$statuses_count ~ nodes_all$is_anti)
+```
+
+```{r nonparametric ver}
+wilcox.test(data = nodes_all, favourites_count ~ is_anti)
+wilcox.test(data = nodes_all, friends_count ~ is_anti)
+wilcox.test(data = nodes_all, statuses_count ~ is_anti)
+wilcox.test(data = nodes_all, followers_count ~ is_anti)
+```
+
+```{r medians}
+group_by(nodes_all, is_anti) %>%
+  summarise(
+    #count = n(),
+    followers = median(followers_count, na.rm = TRUE),
+    friends = median(friends_count, na.rm = TRUE),
+    status = median(statuses_count, na.rm = TRUE),
+    faves = median(favourites_count, na.rm = TRUE)
+    #IQR = IQR(weight, na.rm = TRUE)
+  )
+```
+
+```{r hypothesis 3 and 4}
+t.test(nodes_all$diff_sent ~ nodes_all$is_anti)
+t.test(nodes_all$diff_ML ~ nodes_all$is_anti)
+
+t.test(anti_nodes_all$post_sent, anti_nodes_all$pre_sent, paired = TRUE)
+t.test(pro_nodes_all$post_sent, pro_nodes_all$pre_sent, paired = TRUE)
+
+t.test(anti_nodes_all$post_ML, anti_nodes_all$pre_ML, paired = TRUE)
+t.test(pro_nodes_all$post_ML, pro_nodes_all$pre_ML, paired = TRUE)
+```
+
+# Data Visualization of Anti-Vaccination Network
+
+```{r graph objs and density}
+pro1 <- graph.data.frame(pro_edges, pro_nodes, directed = T)
+pro2 <- graph.data.frame(pro_edges_all, pro_nodes_all, directed = T)
+anti1 <- graph.data.frame(anti_edges, anti_nodes, directed = T)
+anti2 <- graph.data.frame(anti_edges_all, anti_nodes_all, directed = T)
+
+print(paste("Pro-Vaccination Overall Density:", edge_density(pro2)))
+print(paste("Anti-Vaccination Overall Density:", edge_density(anti2)))
+print(paste("Pro-Vaccination Density without singles:", edge_density(pro1)))
+print(paste("Anti-Vaccination Density without singles:", edge_density(anti1)))
+```
+
+```{r anti network}
+vlabs = c(rep(NA, 27), "BusyDrT", rep(NA,36))
+l <- layout_with_fr(anti1)
+l <- layout.norm(l, ymin=-1, ymax=1, xmin=-1.5, xmax=1.5)
+plot(anti1, edge.arrow.size = .4, vertex.label = vlabs, vertex.size = 5, layout = l, rescale = F)
+```
+
+```{r calculating centrality}
+V(anti1)$uuid <- anti_nodes$uuid
+
+pro_central <- merge(pro_nodes, data.frame("uuid" = V(pro1)$uuid,
+                                           "ind" = degree(pro1, mode = "in"), 
+                                           "outd" = degree(pro1, mode = "out"), 
+                                           "degree" = degree(pro1, mode = "total"),
+                                           "btwn" = betweenness(pro1, directed = T),
+                                           "close" = closeness(pro1, mode = c("all")),
+                                           "eigen" = evcent(pro1)[1]), by = "uuid")
+anti_central <- merge(anti_nodes, data.frame("uuid" = V(anti1)$uuid, 
+                                             "ind" = degree(anti1, mode = "in"), 
+                                             "outd" = degree(anti1, mode = "out"),
+                                             "degree" = degree(anti1, mode = "total"),
+                                             "btwn" = betweenness(anti1, directed = T),
+                                             "close" = closeness(anti1, mode = c("all")),
+                                             "eigen" = evcent(anti1)[1]), by = "uuid")
+
+
+pro_central <- pro_central[,c(2,1,3:ncol(pro_central))]
+#anti_central <- anti_central[,c(2,1,3:ncol(anti_central))]
+```
+
+```{r antivaxx corr matrix}
+anti_corr_matrix <- round(cor(dplyr::select(anti_central, -c(uuid, lang, names, description)), use= 'complete.obs'), digits = 2)
+
+anti_upper_corr <- anti_corr_matrix
+anti_upper_corr[upper.tri(anti_corr_matrix, diag = F)] <- ""
+anti_upper_corr <- as.data.frame(anti_upper_corr)
+anti_corr_tbl <- hux(anti_upper_corr, add_colnames = T, add_rownames = T, autoformat = F) %>% map_background_color(everywhere, everywhere, by_colorspace("blue", "red"))
+bold(anti_corr_tbl)[1, ] <- T
+bold(anti_corr_tbl)[ ,1] <- T
+bottom_border(anti_corr_tbl)[1,2:18] <- 1
+right_border(anti_corr_tbl)[2:18,1] <- 1
+anti_corr_tbl
+```
+
+```{r graph objs with centrality}
+anti3 <- graph.data.frame(anti_edges, anti_central, directed = T)
+pro3 <- graph.data.frame(pro_edges, pro_central, directed = T)
+```
+
+```{r anti networks w centrality}
+antipal <- colorRampPalette(c("pink", "darkred"))
+
+par(mfrow = c(1,2))
+
+plot(anti3, vertex.color = V(anti3)$btwn, edge.arrow.size = 0.4, vertex.label = NA, layout = layout.kamada.kawai, asp = 0, vertex.size = 10, palette = antipal(max(V(anti3)$btwn)))#, vertex.frame.color = V(anti2)$btwn)
+
+#plot(anti3, vertex.color = V(anti3)$close, edge.arrow.size = 0.4, vertex.label = NA, layout = layout.kamada.kawai, asp = 0, vertex.size = 10, palette = antipal(max(V(anti3)$close)+2))#, vertex.frame.color = V(anti2)$close)
+
+plot(anti3, vertex.color = V(anti3)$degree, edge.arrow.size = 0.4, vertex.label = NA, layout = layout.kamada.kawai, asp = 0, vertex.size = 10, palette = antipal(max(V(anti3)$degree)))#, vertex.frame.color = V(anti2)$degree)
+
+#plot(anti3, vertex.color = V(anti3)$vector, edge.arrow.size = 0.4, vertex.label = NA, layout = layout.kamada.kawai, asp = 0, vertex.size = 10, palette = antipal(max(V(anti3)$vector)+2))#, vertex.frame.color = V(anti2)$vector)
+```
+
+```{r most central nodes}
+test <- anti_central %>% filter(degree == max(degree) | btwn == max(btwn) | close == max(close) | vector == max(vector) | ind == max(ind) | outd == max(outd)) %>% select(c(names, ind, outd, degree, btwn, close, vector))
+
+test$degree[test$degree < max(test$degree)] = ""
+test$ind[test$ind < max(test$ind)] = ""
+test$outd[test$outd < max(test$outd)] = ""
+test$btwn[test$btwn < max(test$btwn)] = ""
+test$close[test$close < max(test$close)] = ""
+test$vector[test$vector < max(test$vector)] = ""
+
+best_tbl <- hux(test, add_colnames = T, autoformat = F)
+bold(best_tbl)[1, ] <- T
+bold(best_tbl)[ ,1] <- T
+bottom_border(best_tbl)[1, ] <- 1
+best_tbl
+```
+
+# Data Visualization of Pro-Vaccination Network
+
+```{r pro network}
+#vlabs = c(rep(NA, 26), "WHO", rep(NA,13))
+#plot(pro1, edge.arrow.size=.4, vertex.label = vlabs, layout = layout_as_star(pro1, center = V(pro1)[27], order = NULL))
+l <- layout_with_fr(pro1)
+l <- layout.norm(l, ymin=-1, ymax=1, xmin=-1.5, xmax=1.5)
+plot(pro1, edge.arrow.size = .4, vertex.label = NA, vertex.size = 5, layout = l, rescale = F)
+```
+
+```{r provaxx corr matrix}
+pro_corr_matrix <- round(cor(dplyr::select(pro_central, -c(uuid, lang, names, description)), use= 'complete.obs'), digits = 2)
+
+pro_upper_corr <- pro_corr_matrix
+pro_upper_corr[upper.tri(pro_corr_matrix, diag = F)] <- ""
+pro_upper_corr <- as.data.frame(pro_upper_corr)
+pro_corr_tbl <- hux(pro_upper_corr, add_colnames = T, add_rownames = T, autoformat = F) %>% map_background_color(everywhere, everywhere, by_colorspace("blue", "red"))
+bold(pro_corr_tbl)[1, ] <- T
+bold(pro_corr_tbl)[ ,1] <- T
+bottom_border(pro_corr_tbl)[1,2:15] <- 1
+right_border(pro_corr_tbl)[2:15,1] <- 1
+pro_corr_tbl
+```
+
+```{r pro graphs w centrality}
+propal <- colorRampPalette(c("skyblue", "navy"))
+
+par(mfrow = c(1,2))
+
+plot(pro3, vertex.color = V(pro3)$btwn, edge.arrow.size = 0.4, vertex.label = NA, layout = layout.kamada.kawai, asp = 0, vertex.size = 10, palette = propal(max(V(pro3)$btwn)))#, vertex.frame.color = V(anti2)$btwn)
+
+#plot(pro2, vertex.color = V(pro2)$close, edge.arrow.size = 0.4, vertex.label = NA, layout = layout.kamada.kawai, asp = 0, vertex.size = 10, palette = propal(max(V(pro2)$close)+2))#, vertex.frame.color = V(anti2)$close)
+
+plot(pro3, vertex.color = V(pro3)$degree, edge.arrow.size = 0.4, vertex.label = NA, layout = layout.kamada.kawai, asp = 0, vertex.size = 10, palette = propal(max(V(pro3)$degree)))#, vertex.frame.color = V(anti2)$degree)
+
+#plot(pro2, vertex.color = V(pro2)$vector, edge.arrow.size = 0.4, vertex.label = NA, layout = layout.kamada.kawai, asp = 0, vertex.size = 10, palette = propal(max(V(pro2)$vector)+2))#, vertex.frame.color = V(anti2)$vector)
+```
+
+```{r most central nodes pro}
+test <- pro_central %>% filter(degree == max(degree) | btwn == max(btwn) | close == max(close) | vector == max(vector) | ind == max(ind)) %>% select(c(names, ind, outd, degree, btwn, close, vector))
+
+test$degree[test$degree < max(test$degree)] = ""
+test$ind[test$ind < max(test$ind)] = ""
+#test$outd[test$outd < max(test$outd)] = ""
+test$btwn[test$btwn < max(test$btwn)] = ""
+test$close[test$close < max(test$close)] = ""
+test$vector[test$vector < max(test$vector)] = ""
+
+best_tbl <- hux(test, add_colnames = T, autoformat = F)
+bold(best_tbl)[1, ] <- T
+bold(best_tbl)[ ,1] <- T
+bottom_border(best_tbl)[1, ] <- 1
+best_tbl
+```
+
+# Final Network Visualizations
+
+```{r graphing with degree anti}
+#plot(anti3, edge.arrow.size = 0.4, vertex.label = V(anti3)$names, vertex.size = V(anti3)$ind/2, vertex.label.cex = V(anti3)$outd/5, vertex.label.degree = -pi/2, vertex.label.dist=1, layout = layout.kamada.kawai(anti3), vertex.color = "pink", vertex.frame.color = "white", vertex.label.color = "black", main = "In- and out-degree of an antivaccination Twitter network", sub = "Labels sized by out-degree, verteces sized by in-degree\nThis image is not in the same scale as the provaccination network", asp = 0)
+
+vlabs = c(rep(NA, 4), "Source", rep(NA, 68))
+
+plot(anti3, edge.arrow.size = 0.4, vertex.label = vlabs, vertex.size = V(anti3)$ind, layout = layout.star(anti3, center = V(anti3)[5]), vertex.color = V(anti3)$outd*10, vertex.frame.color = "white", vertex.label.color = "black", main = "In- and out-degree of an anti-vaccination Twitter network", sub = "Vertices are colored by out-degree and sized by in-degree\nThis image is not in the same scale as the pro-vaccination network", asp = 0, palette = antipal(max(V(anti3)$degree)))
+```
+
+```{r graphing with degree pro}
+plot(pro3, vertex.color = V(pro3)$outd, edge.arrow.size = 0.4, vertex.label = NA, vertex.size = V(pro3)$ind*5, layout = layout.kamada.kawai, asp = 0, vertex.size = 10, main = "In- and out-degree of a pro-vaccination Twitter network", sub = "Vertices are colored by out-degree and sized by in-degree\nThis image is not in the same scale as the anti-vaccination network", asp = 0, palette = propal(max(V(pro3)$outd)))
+```
+
