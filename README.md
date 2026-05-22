@@ -220,37 +220,41 @@ Wordsworth, W. (2018, September 26). Confessions of a Fake News Writer. Medium. 
 ## Appendix A: Tables and Figures
 ### Figure 1
 #### Distribution of total number of followers for pro- and anti-vaccination nodes
-
+![Figure 1](https://github.com/lemonlinn/Masters_Thesis/blob/master/image5.png)
 
 ### Figure 2
 #### Distribution of total number of accounts followed for pro- and anti-vaccination nodes
-
+![Figure 2](https://github.com/lemonlinn/Masters_Thesis/blob/master/image6.png)
 
 ### Figure 3
 #### Distribution of total number of tweets posted for pro- and anti-vaccination nodes
-
+![Figure 3](https://github.com/lemonlinn/Masters_Thesis/blob/master/image7.png)
 
 ### Figure 4
 #### Distribution of total number of favorited tweets for pro- and anti-vaccination nodes
+![Figure 4](https://github.com/lemonlinn/Masters_Thesis/blob/master/image8.png)
 
 ### Figure 5
 #### Distribution of pre-exposure sentiment scores for pro- and anti-vaccination nodes
-
+![Figure 5](https://github.com/lemonlinn/Masters_Thesis/blob/master/image9.png)
 
 ### Figure 6
 #### Distribution of post-exposure sentiment scores for pro- and anti-vaccination nodes
+<img src="https://github.com/lemonlinn/Masters_Thesis/blob/master/image10.png" alt="Figure 6" width="100%"/>
 
 ### Figure 7
 #### Distribution of pre-exposure sentiment using logistic regression for pro- and anti-vaccination nodes
-
+![Figure 7](https://github.com/lemonlinn/Masters_Thesis/blob/master/image11.png)
 
 ### Figure 8
 #### Distribution of pre-exposure sentiment using logistic regression for pro- and anti-vaccination nodes
+![Figure 8](https://github.com/lemonlinn/Masters_Thesis/blob/master/image12.png)
 
 ### Figure 9
 #### Social network graph for anti-vaccination retweeters
-
+<img src="https://github.com/lemonlinn/Masters_Thesis/blob/master/image13.png" alt="Figure 9" width="100%"/>
 
 ### Figure 10
 #### Social network graph for pro-vaccination retweeters
+![Figure 10](https://github.com/lemonlinn/Masters_Thesis/blob/master/image14.png)
 
